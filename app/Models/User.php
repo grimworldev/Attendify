@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,13 +16,13 @@ use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * @property int $id
  * @property string $uuid
  * @property string $first_name
  * @property string $last_name
+ * @property string $username
  * @property string $email
  * @property string $gender
  * @property int|null $role_id
@@ -36,7 +37,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
  * @property-read string $name
  * @property-read Role|null $role
  */
-#[Fillable(['first_name', 'last_name', 'username','email', 'gender', 'role_id', 'password'])]
+#[Fillable(['first_name', 'last_name', 'username', 'email', 'gender', 'role_id', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -98,5 +99,31 @@ class User extends Authenticatable implements PasskeyUser
         return Attribute::make(
             get: fn() => trim("{$this->first_name} {$this->last_name}"),
         );
+    }
+
+    /**
+     * Determine if this user has the given role, by slug.
+     */
+    public function hasRole(string $slug): bool
+    {
+        return $this->role?->slug === $slug;
+    }
+
+    /**
+     * Determine if this user has any of the given roles, by slug.
+     *
+     * @param  array<int, string>  $slugs
+     */
+    public function hasAnyRole(array $slugs): bool
+    {
+        return in_array($this->role?->slug, $slugs, strict: true);
+    }
+
+    /**
+     * Determine if this user is a superadmin.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('superadmin');
     }
 }

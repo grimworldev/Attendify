@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
@@ -54,7 +54,7 @@ export default function Edit({ user, roles }: Props) {
                     {...update.form(user.uuid)}
                     resetOnSuccess={['password']}
                     disableWhileProcessing
-                    className="flex max-w-lg flex-col gap-6"
+                    className="flex flex-col gap-6"
                 >
                     {({ processing, errors }) => (
                         <>
@@ -66,7 +66,6 @@ export default function Edit({ user, roles }: Props) {
                                     <Input
                                         id="first_name"
                                         type="text"
-                                        required
                                         autoFocus
                                         tabIndex={1}
                                         name="first_name"
@@ -85,7 +84,6 @@ export default function Edit({ user, roles }: Props) {
                                     <Input
                                         id="last_name"
                                         type="text"
-                                        required
                                         tabIndex={2}
                                         name="last_name"
                                         defaultValue={user.last_name}
@@ -100,7 +98,6 @@ export default function Edit({ user, roles }: Props) {
                                 <Input
                                     id="username"
                                     type="text"
-                                    required
                                     tabIndex={3}
                                     name="username"
                                     defaultValue={user.username}
@@ -114,7 +111,6 @@ export default function Edit({ user, roles }: Props) {
                                 <Input
                                     id="email"
                                     type="email"
-                                    required
                                     tabIndex={4}
                                     name="email"
                                     defaultValue={user.email}
@@ -127,7 +123,6 @@ export default function Edit({ user, roles }: Props) {
                                 <Label htmlFor="gender">Gender</Label>
                                 <Select
                                     name="gender"
-                                    required
                                     defaultValue={user.gender ?? undefined}
                                 >
                                     <SelectTrigger
@@ -196,14 +191,20 @@ export default function Edit({ user, roles }: Props) {
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-end gap-3">
+                                <Button asChild variant="destructive">
+                                    <Link
+                                        href={`/users/${user.uuid}`}
+                                        tabIndex={9}
+                                    >
+                                        Cancel
+                                    </Link>
+                                </Button>
+
                                 <Button type="submit" tabIndex={8}>
                                     {processing && <Spinner />}
                                     Save changes
                                 </Button>
-                                <TextLink href="/users" tabIndex={9}>
-                                    Cancel
-                                </TextLink>
                             </div>
                         </>
                     )}

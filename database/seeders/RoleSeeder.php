@@ -17,25 +17,25 @@ class RoleSeeder extends Seeder
             [
                 'name' => 'Super Admin',
                 'slug' => 'superadmin',
-                'description' => 'Full access to all parts of the system.',
+                'description' => 'Has full access to the gym management system, including users, roles, memberships, payments, RFID access, and system settings.',
                 'status' => 1,
             ],
             [
                 'name' => 'Admin',
                 'slug' => 'admin',
-                'description' => 'Manages users, roles, and gym membership records.',
+                'description' => 'Manages gym members, memberships, user accounts, RFID cards, and gym records.',
                 'status' => 1,
             ],
             [
-                'name' => 'Teller',
-                'slug' => 'teller',
-                'description' => 'Handles front-desk transactions and check-ins.',
+                'name' => 'Manager',
+                'slug' => 'manager',
+                'description' => 'Oversees daily gym operations, monitors member activity, check-ins, and RFID access records.',
                 'status' => 1,
             ],
             [
-                'name' => 'Cashier',
-                'slug' => 'cashier',
-                'description' => 'Handles payments and billing.',
+                'name' => 'Registrar',
+                'slug' => 'registrar',
+                'description' => 'Registers gym members, manages membership details, processes payments, and assigns or manages RFID membership cards.',
                 'status' => 1,
             ],
         ];

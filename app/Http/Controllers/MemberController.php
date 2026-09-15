@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\MemberRequest;
+use App\Models\Member;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class MemberController extends Controller
+{
+    public function index(): Response
+    {
+        $this->authorize('viewAny', Member::class);
+
+        $members = Member::query()
+            ->with('currentMembership.membershipType')
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('members/index', [
+            'members' => $members,
+        ]);
+    }
+
+    public function create(): Response
+    {
+        $this->authorize('create', Member::class);
+
+        return Inertia::render('members/create');
+    }
+
+    public function store(MemberRequest $request): RedirectResponse
+    {
+        $this->authorize('create', Member::class);
+
+        Member::create([
+            ...$request->validated(),
+            'registered_by' => $request->user()->id,
+        ]);
+
+        return redirect()
+            ->route('members.index')
+            ->with('success', 'Member registered successfully.');
+    }
+
+    public function show(Member $member): Response
+    {
+        $this->authorize('view', $member);
+
+        return Inertia::render('members/show', [
+            'member' => $member->load('currentMembership.membershipType', 'registeredBy'),
+        ]);
+    }
+
+    public function edit(Member $member): Response
+    {
+        $this->authorize('update', $member);
+
+        return Inertia::render('members/edit', [
+            'member' => $member,
+        ]);
+    }
+
+    public function update(MemberRequest $request, Member $member): RedirectResponse
+    {
+        $this->authorize('update', $member);
+
+        $member->update($request->validated());
+
+        return redirect()
+            ->route('members.index')
+            ->with('success', 'Member updated successfully.');
+    }
+
+    public function destroy(Member $member): RedirectResponse
+    {
+        $this->authorize('delete', $member);
+
+        $member->delete();
+
+        return redirect()
+            ->route('members.index')
+            ->with('success', 'Member deleted successfully.');
+    }
+}

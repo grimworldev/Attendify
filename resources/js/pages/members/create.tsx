@@ -1,10 +1,10 @@
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
     Select,
     SelectContent,
@@ -14,34 +14,25 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { dashboard } from '@/routes';
-import { store } from '@/routes/users';
+import { store } from '@/routes/members';
 
-type Role = {
-    id: number;
-    name: string;
-};
-
-type Props = {
-    roles: Role[];
-};
-
-export default function Create({ roles }: Props) {
+export default function Create() {
     return (
         <>
-            <Head title="Add user" />
+            <Head title="Member Registration" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div>
                     <h1 className="text-lg font-semibold text-foreground">
-                        Add user
+                        Register Member
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Create a new account and assign a role.
+                        Create a profile for a new member and assign
+                        membership details.
                     </p>
                 </div>
 
                 <Form
                     {...store.form()}
-                    resetOnSuccess={['password']}
                     disableWhileProcessing
                     className="flex flex-col gap-6"
                 >
@@ -55,7 +46,6 @@ export default function Create({ roles }: Props) {
                                     <Input
                                         id="first_name"
                                         type="text"
-
                                         autoFocus
                                         tabIndex={1}
                                         name="first_name"
@@ -74,7 +64,6 @@ export default function Create({ roles }: Props) {
                                     <Input
                                         id="last_name"
                                         type="text"
-
                                         tabIndex={2}
                                         name="last_name"
                                         placeholder="Last name"
@@ -87,25 +76,11 @@ export default function Create({ roles }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="username">Username</Label>
-                                <Input
-                                    id="username"
-                                    type="text"
-
-                                    tabIndex={3}
-                                    name="username"
-                                    placeholder="Username"
-                                />
-                                <InputError message={errors.username} />
-                            </div>
-
-                            <div className="grid gap-2">
                                 <Label htmlFor="email">Email address</Label>
                                 <Input
                                     id="email"
                                     type="email"
-
-                                    tabIndex={4}
+                                    tabIndex={3}
                                     name="email"
                                     placeholder="email@example.com"
                                 />
@@ -113,75 +88,78 @@ export default function Create({ roles }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="gender">Gender</Label>
-                                <Select name="gender" >
-                                    <SelectTrigger
-                                        id="gender"
-                                        tabIndex={5}
-                                        className="w-full"
-                                    >
-                                        <SelectValue placeholder="Select gender" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Male">
-                                            Male
-                                        </SelectItem>
-                                        <SelectItem value="Female">
-                                            Female
-                                        </SelectItem>
-                                        <SelectItem value="Others">
-                                            Others
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <InputError message={errors.gender} />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="role_id">Role</Label>
-                                <Select name="role_id">
-                                    <SelectTrigger
-                                        id="role_id"
-                                        tabIndex={6}
-                                        className="w-full"
-                                    >
-                                        <SelectValue placeholder="No role" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {roles.map((role) => (
-                                            <SelectItem
-                                                key={role.id}
-                                                value={String(role.id)}
-                                            >
-                                                {role.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <InputError message={errors.role_id} />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
-                                <PasswordInput
-                                    id="password"
-
-                                    tabIndex={7}
-                                    name="password"
-                                    placeholder="Password"
+                                <Label htmlFor="phone_number">
+                                    Phone number
+                                </Label>
+                                <Input
+                                    id="phone_number"
+                                    type="tel"
+                                    tabIndex={4}
+                                    name="phone_number"
+                                    placeholder="09XX XXX XXXX"
                                 />
-                                <InputError message={errors.password} />
+                                <InputError message={errors.phone_number} />
                             </div>
 
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="gender">Gender</Label>
+                                    <Select name="gender">
+                                        <SelectTrigger
+                                            id="gender"
+                                            tabIndex={5}
+                                            className="w-full"
+                                        >
+                                            <SelectValue placeholder="Select gender" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Male">
+                                                Male
+                                            </SelectItem>
+                                            <SelectItem value="Female">
+                                                Female
+                                            </SelectItem>
+                                            <SelectItem value="Others">
+                                                Others
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <InputError message={errors.gender} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="birthdate">
+                                        Birthdate
+                                    </Label>
+                                    <Input
+                                        id="birthdate"
+                                        type="date"
+                                        tabIndex={6}
+                                        name="birthdate"
+                                    />
+                                    <InputError message={errors.birthdate} />
+                                </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="address">Address</Label>
+                                <Textarea
+                                    id="address"
+                                    tabIndex={7}
+                                    name="address"
+                                    placeholder="House no., street, barangay, city"
+                                    rows={3}
+                                />
+                                <InputError message={errors.address} />
+                            </div>
                             <div className="flex items-center justify-end gap-3">
-                                <TextLink href="/users" tabIndex={9}>
+                                <TextLink href="/members" tabIndex={10}>
                                     Cancel
                                 </TextLink>
-                                <Button type="submit" tabIndex={8}>
+                                <Button type="submit" tabIndex={9}>
                                     {processing && <Spinner />}
                                     Save
                                 </Button>
-
                             </div>
                         </>
                     )}
@@ -194,7 +172,7 @@ export default function Create({ roles }: Props) {
 Create.layout = {
     breadcrumbs: [
         { title: 'Dashboard', href: dashboard() },
-        { title: 'Users', href: '/users' },
-        { title: 'Add user', href: '/users/create' },
+        { title: 'Members', href: '/members' },
+        { title: 'Register Member', href: '/members/create' },
     ],
 };

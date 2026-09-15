@@ -17,6 +17,8 @@ class UserController extends Controller
      */
     public function index(): Response
     {
+        $this->authorize('viewAny', User::class);
+
         $users = User::query()
             ->with('role')
             ->latest()
@@ -33,6 +35,8 @@ class UserController extends Controller
      */
     public function create(): Response
     {
+        $this->authorize('create', User::class);
+
         return Inertia::render('users/create', [
             'roles' => Role::query()->where('status', 1)->get(['id', 'name']),
         ]);
@@ -43,6 +47,8 @@ class UserController extends Controller
      */
     public function store(UserRequest $request): RedirectResponse
     {
+        $this->authorize('create', User::class);
+
         $validated = $request->validated();
 
         User::create([
@@ -60,6 +66,8 @@ class UserController extends Controller
      */
     public function show(User $user): Response
     {
+        $this->authorize('view', $user);
+
         return Inertia::render('users/show', [
             'user' => $user->load('role'),
         ]);
@@ -70,6 +78,8 @@ class UserController extends Controller
      */
     public function edit(User $user): Response
     {
+        $this->authorize('update', $user);
+
         return Inertia::render('users/edit', [
             'user' => $user,
             'roles' => Role::query()->where('status', 1)->get(['id', 'name']),
@@ -81,6 +91,8 @@ class UserController extends Controller
      */
     public function update(UserRequest $request, User $user): RedirectResponse
     {
+        $this->authorize('update', $user);
+
         $validated = $request->validated();
 
         $user->update([
@@ -100,6 +112,8 @@ class UserController extends Controller
      */
     public function destroy(User $user): RedirectResponse
     {
+        $this->authorize('delete', $user);
+
         $user->delete();
 
         return redirect()
