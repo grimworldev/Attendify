@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\MemberRequest;
 use App\Models\Member;
+use App\Models\MembershipType;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -51,7 +52,15 @@ class MemberController extends Controller
         $this->authorize('view', $member);
 
         return Inertia::render('members/show', [
-            'member' => $member->load('currentMembership.membershipType', 'registeredBy'),
+            'member' => $member->load([
+                'currentMembership.membershipType',
+                'currentMembership.payments',
+                'registeredBy',
+            ]),
+            // Options for the "Add / Renew Membership" dialog's plan select.
+            'membershipTypes' => MembershipType::query()
+                ->orderBy('name')
+                ->get(['id', 'name', 'price']),
         ]);
     }
 

@@ -3,17 +3,37 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import TextLink from '@/components/text-link';
 import { dashboard } from '@/routes';
+import AddMembershipDialog from './partials/add-membership-dialog';
+
+type MembershipPayment = {
+    id: number;
+    transaction_no: string;
+    payment_method: number;
+    amount_paid: string;
+    amount_tendered: string | null;
+    change: string | null;
+    reference_no: string | null;
+    paid_at: string;
+};
 
 type MembershipDetail = {
     id: number;
     start_date: string;
     end_date: string;
     status: number;
+    payments?: MembershipPayment[];
 };
 
 type RegisteredBy = {
+    id: number;
     first_name: string;
     last_name: string;
+};
+
+type MembershipType = {
+    id: number;
+    name: string;
+    price: string | number;
 };
 
 type Member = {
@@ -33,6 +53,7 @@ type Member = {
 
 type Props = {
     member: Member;
+    membershipTypes: MembershipType[];
 };
 
 function Field({
@@ -52,8 +73,7 @@ function Field({
     );
 }
 
-export default function Show({ member }: Props) {
-    console.log(member)
+export default function Show({ member, membershipTypes }: Props) {
     const isActive = member.status === 1;
     const hasValidMembership =
         member.current_membership?.status === 1 &&
@@ -77,7 +97,12 @@ export default function Show({ member }: Props) {
                         <Badge variant={isActive ? 'default' : 'secondary'}>
                             {isActive ? 'Active' : 'Inactive'}
                         </Badge>
-                        <Button asChild size="sm">
+                        <AddMembershipDialog
+                            memberUuid={member.uuid}
+                            membershipTypes={membershipTypes}
+                            hasExistingMembership={!!member.current_membership}
+                        />
+                        <Button asChild size="sm" variant="outline">
                             <Link href={`/members/${member.uuid}/edit`}>
                                 Edit
                             </Link>
@@ -92,7 +117,10 @@ export default function Show({ member }: Props) {
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                         <Field label="Email address" value={member.email} />
-                        <Field label="Phone number" value={member.phone_number} />
+                        <Field
+                            label="Phone number"
+                            value={member.phone_number}
+                        />
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                         <Field label="Gender" value={member.gender} />
