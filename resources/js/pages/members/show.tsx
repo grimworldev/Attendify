@@ -1,7 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import TextLink from '@/components/text-link';
 import { dashboard } from '@/routes';
 import AddMembershipDialog from './partials/add-membership-dialog';
 
@@ -21,6 +20,8 @@ type MembershipDetail = {
     start_date: string;
     end_date: string;
     status: number;
+    type: number;
+    membership_type: { id: number; name: string } | null;
     payments?: MembershipPayment[];
 };
 
@@ -53,6 +54,7 @@ type Member = {
 
 type Props = {
     member: Member;
+    membershipHistory: MembershipDetail[];
     membershipTypes: MembershipType[];
 };
 
@@ -73,7 +75,7 @@ function Field({
     );
 }
 
-export default function Show({ member, membershipTypes }: Props) {
+export default function Show({ member, membershipHistory, membershipTypes }: Props) {
     const isActive = member.status === 1;
     const hasValidMembership =
         member.current_membership?.status === 1 &&
@@ -178,6 +180,89 @@ export default function Show({ member, membershipTypes }: Props) {
                         <p className="text-sm text-muted-foreground">
                             No membership record yet.
                         </p>
+                    )}
+                </div>
+
+                <div className="grid gap-4 rounded-xl border p-6">
+                    <h2 className="text-sm font-semibold text-foreground">
+                        Membership History
+                    </h2>
+
+                    {membershipHistory.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            No membership transactions yet.
+                        </p>
+                    ) : (
+                        <table className="w-full border-collapse text-left text-sm">
+                            <thead>
+                                <tr className="border-b border-sidebar-border/70 dark:border-sidebar-border">
+                                    <th className="py-2 pr-4 font-medium text-muted-foreground">
+                                        Plan
+                                    </th>
+                                    <th className="py-2 pr-4 font-medium text-muted-foreground">
+                                        Start
+                                    </th>
+                                    <th className="py-2 pr-4 font-medium text-muted-foreground">
+                                        End
+                                    </th>
+                                    <th className="py-2 pr-4 font-medium text-muted-foreground">
+                                        Amount
+                                    </th>
+                                    <th className="py-2 font-medium text-muted-foreground">
+                                        Type
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {membershipHistory.map((record) => {
+                                    const totalPaid = (
+                                        record.payments ?? []
+                                    ).reduce(
+                                        (sum, p) =>
+                                            sum + parseFloat(p.amount_paid),
+                                        0,
+                                    );
+
+                                    return (
+                                        <tr
+                                            key={record.id}
+                                            className="border-b border-sidebar-border/70 last:border-b-0 dark:border-sidebar-border"
+                                        >
+                                            <td className="py-2 pr-4 text-foreground">
+                                                {record.membership_type
+                                                    ?.name ?? '—'}
+                                            </td>
+                                            <td className="py-2 pr-4 text-muted-foreground">
+                                                {new Date(
+                                                    record.start_date,
+                                                ).toLocaleDateString()}
+                                            </td>
+                                            <td className="py-2 pr-4 text-muted-foreground">
+                                                {new Date(
+                                                    record.end_date,
+                                                ).toLocaleDateString()}
+                                            </td>
+                                            <td className="py-2 pr-4 text-muted-foreground">
+                                                ₱{totalPaid.toFixed(2)}
+                                            </td>
+                                            <td className="py-2">
+                                                <Badge
+                                                    variant={
+                                                        record.type === 1
+                                                            ? 'default'
+                                                            : 'secondary'
+                                                    }
+                                                >
+                                                    {record.type === 1
+                                                        ? 'Renewal'
+                                                        : 'New'}
+                                                </Badge>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     )}
                 </div>
 

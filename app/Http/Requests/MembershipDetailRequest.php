@@ -4,8 +4,10 @@ namespace App\Http\Requests;
 
 use App\Models\MembershipDetail;
 use App\Models\MembershipPayment;
+use App\Models\MembershipType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class MembershipDetailRequest extends FormRequest
 {
@@ -57,7 +59,9 @@ class MembershipDetailRequest extends FormRequest
             'amount_tendered' => [
                 'nullable',
                 'numeric',
-                'min:0',
+                // Cash tendered can never be less than what's being applied
+                // toward the balance — otherwise "change" would go negative.
+                'gte:amount_paid',
                 Rule::requiredIf(
                     fn() => (int) $this->input('payment_method') === MembershipPayment::METHOD_CASH,
                 ),
@@ -98,5 +102,35 @@ class MembershipDetailRequest extends FormRequest
             ],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
+    }
+
+    /**
+     * amount_paid must cover at least the selected plan's listed price.
+     * This needs a DB lookup and only applies on store (not update, since
+     * update never touches amount_paid), so it can't be a plain string rule.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        if (!$this->isMethod('post')) {
+            return;
+        }
+
+        $validator->after(function (Validator $validator) {
+            $membershipTypeId = $this->input('membership_type_id');
+            $amountPaid = $this->input('amount_paid');
+
+            if (!$membershipTypeId || $amountPaid === null) {
+                return; // let the required/exists rules report this instead
+            }
+
+            $membershipType = MembershipType::find($membershipTypeId);
+
+            if ($membershipType && (float) $amountPaid < (float) $membershipType->price) {
+                $validator->errors()->add(
+                    'amount_paid',
+                    "Amount paid must be at least ₱{$membershipType->price} for this plan.",
+                );
+            }
+        });
     }
 }

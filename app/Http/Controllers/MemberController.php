@@ -57,10 +57,18 @@ class MemberController extends Controller
                 'currentMembership.payments',
                 'registeredBy',
             ]),
+            // Full transaction history — every signup + renewal, newest first.
+            // Uses reorder() because the base membershipDetails() relation
+            // defaults to oldest-first for other use cases.
+            'membershipHistory' => $member->membershipDetails()
+                ->reorder()
+                ->latest('start_date')
+                ->with(['membershipType:id,name', 'payments'])
+                ->get(),
             // Options for the "Add / Renew Membership" dialog's plan select.
             'membershipTypes' => MembershipType::query()
                 ->orderBy('name')
-                ->get(['id', 'name', 'price']),
+                ->get(['id', 'name', 'price', 'duration_in_days']),
         ]);
     }
 

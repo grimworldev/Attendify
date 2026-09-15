@@ -36,4 +36,14 @@ class MemberPolicy
     {
         return false;
     }
+
+    /**
+     * Record a new membership signup/renewal and its payment for this member.
+     * Same roles as editing member details — Registrar is the one actually
+     * handling these front-desk transactions day to day.
+     */
+    public function manageMembership(User $user, Member $member): bool
+    {
+        return $user->hasAnyRole(['admin', 'manager', 'registrar']);
+    }
 }

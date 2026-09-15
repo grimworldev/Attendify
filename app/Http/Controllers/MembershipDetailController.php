@@ -103,19 +103,11 @@ class MembershipDetailController extends Controller
      * if the amount paid was wrong, that's fixed via a MembershipPayment
      * record instead, to preserve the payment audit trail.
      */
-    public function update(Request $request, MembershipDetail $membershipDetail): RedirectResponse
+    public function update(MembershipDetailRequest $request, MembershipDetail $membershipDetail): RedirectResponse
     {
-        // $this->authorize('manageMembership', $membershipDetail->member);
+        $this->authorize('update', $membershipDetail);
 
-        $validated = $request->validate([
-            'membership_type_id' => ['sometimes', 'exists:membership_types,id'],
-            'start_date' => ['sometimes', 'date'],
-            'end_date' => ['sometimes', 'date', 'after:start_date'],
-            'status' => ['sometimes', 'integer', 'in:0,1,2'],
-            'notes' => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        $membershipDetail->update($validated);
+        $membershipDetail->update($request->validated());
 
         return redirect()
             ->route('members.show', $membershipDetail->member)
@@ -130,9 +122,9 @@ class MembershipDetailController extends Controller
      */
     public function destroy(MembershipDetail $membershipDetail): RedirectResponse
     {
-        $member = $membershipDetail->member;
+        $this->authorize('delete', $membershipDetail);
 
-        $this->authorize('manageMembership', $member);
+        $member = $membershipDetail->member;
 
         $membershipDetail->delete();
 

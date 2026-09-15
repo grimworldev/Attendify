@@ -4,6 +4,7 @@ import {
     Users,
     UserRoundCheck,
     CreditCard,
+    Receipt,
     Dumbbell,
     ClipboardList,
     CalendarDays,
@@ -45,6 +46,11 @@ const mainNavItems: NavItem[] = [
         title: 'Membership Plans',
         href: '/membership-types',
         icon: CreditCard,
+    },
+    {
+        title: 'Transactions',
+        href: '/transactions',
+        icon: Receipt,
     },
     {
         title: 'Workouts',

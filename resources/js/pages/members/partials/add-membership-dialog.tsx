@@ -37,6 +37,7 @@ type MembershipType = {
     id: number;
     name: string;
     price: string | number;
+    duration_in_days: number;
 };
 
 type Props = {
@@ -47,18 +48,63 @@ type Props = {
     hasExistingMembership: boolean;
 };
 
+function todayIso(): string {
+    return new Date().toISOString().split('T')[0];
+}
+
+function addDaysIso(dateIso: string, days: number): string {
+    const date = new Date(dateIso);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().split('T')[0];
+}
+
 export default function AddMembershipDialog({
     memberUuid,
     membershipTypes,
     hasExistingMembership,
 }: Props) {
     const [open, setOpen] = useState(false);
+    // Defaults to Cash — the most common front-desk payment method.
     const [paymentMethod, setPaymentMethod] = useState<string>(
         PAYMENT_METHOD.CASH,
     );
-    console.log(memberUuid)
+    const [membershipTypeId, setMembershipTypeId] = useState<string>('');
+    const [startDate, setStartDate] = useState<string>(todayIso());
+    const [endDate, setEndDate] = useState<string>('');
+    // Amount payable is locked to the selected plan's price — not
+    // something staff can freely type in.
+    const [amountPayable, setAmountPayable] = useState<string>('');
 
     const isCash = paymentMethod === PAYMENT_METHOD.CASH;
+
+    // Recompute the end date from a given start date + the currently
+    // selected plan's duration. Called whenever the plan or start date
+    // changes — but the user can still type over the result afterward,
+    // since endDate is just regular state, not derived on every render.
+    const recomputeEndDate = (typeId: string, fromStartDate: string) => {
+        const selected = membershipTypes.find(
+            (type) => String(type.id) === typeId,
+        );
+
+        if (selected && fromStartDate) {
+            setEndDate(addDaysIso(fromStartDate, selected.duration_in_days));
+        }
+    };
+
+    const handleMembershipTypeChange = (value: string) => {
+        setMembershipTypeId(value);
+        recomputeEndDate(value, startDate);
+
+        const selected = membershipTypes.find(
+            (type) => String(type.id) === value,
+        );
+        setAmountPayable(selected ? String(selected.price) : '');
+    };
+
+    const handleStartDateChange = (value: string) => {
+        setStartDate(value);
+        recomputeEndDate(membershipTypeId, value);
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -79,7 +125,8 @@ export default function AddMembershipDialog({
                     </DialogTitle>
                     <DialogDescription>
                         Record the membership plan and the payment taken for
-                        it.
+                        it. The end date and amount payable fill in
+                        automatically based on the selected plan.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -105,7 +152,11 @@ export default function AddMembershipDialog({
                                 <Label htmlFor="membership_type_id">
                                     Membership plan
                                 </Label>
-                                <Select name="membership_type_id">
+                                <Select
+                                    name="membership_type_id"
+                                    value={membershipTypeId}
+                                    onValueChange={handleMembershipTypeChange}
+                                >
                                     <SelectTrigger
                                         id="membership_type_id"
                                         className="w-full"
@@ -118,7 +169,8 @@ export default function AddMembershipDialog({
                                                 key={type.id}
                                                 value={String(type.id)}
                                             >
-                                                {type.name} — ₱{type.price}
+                                                {type.name} — ₱{type.price} (
+                                                {type.duration_in_days} days)
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -137,21 +189,28 @@ export default function AddMembershipDialog({
                                         id="start_date"
                                         type="date"
                                         name="start_date"
-                                        defaultValue={
-                                            new Date()
-                                                .toISOString()
-                                                .split('T')[0]
+                                        value={startDate}
+                                        onChange={(e) =>
+                                            handleStartDateChange(
+                                                e.target.value,
+                                            )
                                         }
                                     />
                                     <InputError message={errors.start_date} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="end_date">End date</Label>
+                                    <Label htmlFor="end_date">
+                                        End date
+                                    </Label>
                                     <Input
                                         id="end_date"
                                         type="date"
                                         name="end_date"
+                                        value={endDate}
+                                        onChange={(e) =>
+                                            setEndDate(e.target.value)
+                                        }
                                     />
                                     <InputError message={errors.end_date} />
                                 </div>
@@ -195,7 +254,7 @@ export default function AddMembershipDialog({
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="amount_paid">
-                                        Amount paid
+                                        Amount Payable
                                     </Label>
                                     <Input
                                         id="amount_paid"
@@ -203,7 +262,10 @@ export default function AddMembershipDialog({
                                         step="0.01"
                                         min="0"
                                         name="amount_paid"
-                                        placeholder="0.00"
+                                        value={amountPayable}
+                                        readOnly
+                                        placeholder="Select a plan first"
+                                        className="cursor-not-allowed bg-muted text-muted-foreground"
                                     />
                                     <InputError message={errors.amount_paid} />
                                 </div>
@@ -211,7 +273,7 @@ export default function AddMembershipDialog({
                                 {isCash ? (
                                     <div className="grid gap-2">
                                         <Label htmlFor="amount_tendered">
-                                            Cash tendered
+                                            Amount Received
                                         </Label>
                                         <Input
                                             id="amount_tendered"
