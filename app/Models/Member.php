@@ -83,4 +83,27 @@ class Member extends Model
         return $current->status === 1
             && Carbon::parse($current->end_date)->isFuture();
     }
+
+    /**
+     * Full RFID card history for this member (a card can be lost and
+     * a replacement issued, so this can have more than one row).
+     */
+    public function membershipCards(): HasMany
+    {
+        return $this->hasMany(MembershipCard::class)->latest();
+    }
+
+    /**
+     * The card currently in active use, derived by status rather than
+     * a separate flag elsewhere — if the active one is marked lost,
+     * this naturally returns null until a replacement is issued.
+     */
+    public function activeMembershipCard(): HasOne
+    {
+        return $this->hasOne(MembershipCard::class)
+            ->ofMany(
+                ['id' => 'max'],
+                fn($query) => $query->where('status', MembershipCard::STATUS_ACTIVE),
+            );
+    }
 }

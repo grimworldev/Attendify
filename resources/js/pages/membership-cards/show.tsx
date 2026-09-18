@@ -2,9 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
-import AddMembershipDialog from './partials/add-membership-dialog';
-import MarkCardLostDialog from '@/pages/membership-cards/partials/card-mark-lost-dialog';
-
+import MarkCardLostDialog from './partials/card-mark-lost-dialog';
 type MembershipPayment = {
     id: number;
     transaction_no: string;
@@ -38,13 +36,6 @@ type MembershipType = {
     price: string | number;
 };
 
-type ActiveMembershipCard = {
-    id: number;
-    uid: string;
-    status: number;
-    issued_at: string | null;
-};
-
 type Member = {
     uuid: string;
     first_name: string;
@@ -58,7 +49,12 @@ type Member = {
     status: number;
     registered_by: RegisteredBy | null;
     current_membership?: MembershipDetail | null;
-    active_membership_card?: ActiveMembershipCard | null;
+    active_membership_card?: {
+        id: number;
+        uid: string;
+        status: number;
+        issued_at: string | null;
+    } | null;
 };
 
 type Props = {
@@ -86,6 +82,7 @@ function Field({
 
 export default function Show({ member, membershipHistory, membershipTypes }: Props) {
     const isActive = member.status === 1;
+
     const hasValidMembership =
         member.current_membership?.status === 1 &&
         member.current_membership?.end_date &&
@@ -108,11 +105,6 @@ export default function Show({ member, membershipHistory, membershipTypes }: Pro
                         <Badge variant={isActive ? 'default' : 'secondary'}>
                             {isActive ? 'Active' : 'Inactive'}
                         </Badge>
-                        <AddMembershipDialog
-                            memberUuid={member.uuid}
-                            membershipTypes={membershipTypes}
-                            hasExistingMembership={!!member.current_membership}
-                        />
                         <Button asChild size="sm" variant="outline">
                             <Link href={`/members/${member.uuid}/edit`}>
                                 Edit

@@ -9,6 +9,7 @@ import {
     ClipboardList,
     CalendarDays,
     Settings,
+    Contact
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -41,6 +42,11 @@ const mainNavItems: NavItem[] = [
         title: 'Members',
         href: '/members',
         icon: UserRoundCheck,
+    },
+    {
+        title: 'Members Cards',
+        href: '/membership-cards',
+        icon: Contact,
     },
     {
         title: 'Membership Plans',

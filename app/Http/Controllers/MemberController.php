@@ -56,7 +56,9 @@ class MemberController extends Controller
                 'currentMembership.membershipType',
                 'currentMembership.payments',
                 'registeredBy',
+                'activeMembershipCard',
             ]),
+            'hasActiveMembership' => $member->hasActiveMembership(),
             // Full transaction history — every signup + renewal, newest first.
             // Uses reorder() because the base membershipDetails() relation
             // defaults to oldest-first for other use cases.
